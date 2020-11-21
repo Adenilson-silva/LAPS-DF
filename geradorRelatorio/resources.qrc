@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/gerador_relatório" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
