@@ -21,9 +21,11 @@
  *                                                                         *
  ***************************************************************************/
 """
+#from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication #adicionado por mim
+#from PyQt5.QtGui import QAction, QIcon, QFileDialog #adicionado por mim 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtGui import QIcon 
+from qgis.PyQt.QtWidgets import QAction, QFileDialog
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -169,6 +171,9 @@ class geradorDeReleatorioIbram:
 
         # will be set False in run()
         self.first_start = True
+        self.dlg = geradorDeReleatorioIbramDialog()
+        self.dlg.poligonal.clear()#adicionado por mim
+        self.dlg.pushButton.clicked.connect(self.selecionar_poligono) #adicionado por mim
 
 
     def unload(self):
@@ -179,15 +184,24 @@ class geradorDeReleatorioIbram:
                 action)
             self.iface.removeToolBarIcon(action)
 
+    
+    def selecionar_poligono(self):
+        """ Função para obter o caminho onde será salvo o shapefile""" 
+        poligonoCaminho = QFileDialog.getOpenFileName(self.dlg, "Selecionar Arquivo: ", "", "*.shp")
+        self.dlg.poligonal.setText(poligonoCaminho[0])
 
     def run(self):
         """Run method that performs all the real work"""
-
+        
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start == True:
             self.first_start = False
             self.dlg = geradorDeReleatorioIbramDialog()
+            #self.dlg.poligonal.clear()#adicionado por mim """Teste""""
+            #self.dlg.pushButton.clicked.connect(self.selecionar_poligono) #adicionado por mim """Teste""""
+
+
 
         # show the dialog
         self.dlg.show()
@@ -195,6 +209,50 @@ class geradorDeReleatorioIbram:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
+            localSalvo = self.dlg.poligonal.text() """Local onde será salvo o endereço da poligonal (ADA)"""
+
+            buffers = [1, 2, 3, 5, 10] #Criei um vetor para armazenar o valor dos buffers selecionados. A variavel foi iniciada com um valor (1) para a possível produção de mapas, podendo ser alterada a qualquer momento  
+ 
+            ## Condições para os checkboxs criados
+            ## Verificando se todos estão marcados
+            if not self.dlg.buffer2km.isChecked():
+                buffers.remove(2)
+            break
+            if not self.dlg.buffer3km.isChecked():
+                buffers.remove(3)
+            break
+            if not self.dlg.buffer5km.isChecked():
+                buffers.remove(5)
+            break
+            if not self.dlg.buffer10km.isChecked():
+                buffers.remove(10)
+            break
+
+
+
+
+               """print pnt_selection[0] + " esta na " + bh_selection[0]
+             elif not self.dlg.checkBoxBH.isChecked():
+               print u"O item Bacias Hidrográficas não foi selecionado."
+             
+            ## Segunda condição para avaliar se o ponto cai em alguma região de planejamento
+             if self.dlg.checkBoxRP.isChecked():
+               rp_rioPath = "C:/Users/ferna/Desktop/municipiosRJ/limite_RP_SIRGAS.shp" # Não esqueça de corrigir esse caminho no seu computador
+               rp_rioLayer = QgsVectorLayer(rp_rioPath, "RP RJ", "ogr")
+               for w in pnt_layer.getFeatures():
+                 for s in rp_rioLayer.getFeatures():
+                   if s.geometry().intersects(w.geometry()):
+                     ## Número três foi usado pois o nome da região esta na quarta coluna (python começa a contar do zero)
+                     rp_selection.append(s.attributes()[3])
+                     pnt_selection.append(w.attributes()[0])
+                     break
+               print pnt_selection[0] + u" esta na região de " + rp_selection[0]
+             elif not self.dlg.checkBoxRP.isChecked():
+               print u"O item Região de Planejamento não foi selecionado."""
+            
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
+
+
+        
